@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2 class="text">List of Cities and States in Nigeria</h2>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="Capital or Name">
+    <ul class="suggestions">
+      <li>Filter for a capital</li>
+      <li>or a name</li>
+    </ul>
+  </form>
+<script>
+const endpoint = 'http://locationsng-api.herokuapp.com/api/v1/states';
+
+const cities = [];
+
+fetch(endpoint).then(blob => blob.json()).then(data => cities.push(...data))
+
+function findMatches(wordToMatch, cities){
+  return cities.filter(place => {
+    //here we need to find out if the cities or states match our search
+    const regex = new RegExp(wordToMatch, 'gi');
+    return place.capital.match(regex) || place.name.match(regex)
+  });
+}
+
+// function numberWithCommas(x) {
+//   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+// }
+
+function displayMatches() {
+  const matchArray = findMatches(this.value, cities);
+  const html = matchArray.map(place => {
+    const regex = new RegExp(this.value, 'gi');
+    const cityName = place.capital.replace(regex, `<span class="hl">${this.value}</span>`);
+    const stateName = place.name.replace(regex, `<span class="hl">${this.value}</span>`);
+    return `
+      <li>
+        <span class="name">${cityName}, ${stateName}</span>
+      </li>
+    `;
+  }).join('');
+  suggestions.innerHTML = html;
+}
+
+const searchInput = document.querySelector('.search');
+const suggestions = document.querySelector('.suggestions');
+
+searchInput.addEventListener('change', displayMatches);
+searchInput.addEventListener('keyup', displayMatches);
+
+
+</script>
+  </body>
+</html>
